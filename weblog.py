@@ -2,6 +2,7 @@ import markdown
 import pathlib
 import pdb
 import argparse
+import collections
 
 class LinkAgreggator(markdown.treeprocessors.Treeprocessor):
     def run(self, root):
@@ -14,28 +15,33 @@ class LinkAgreggator(markdown.treeprocessors.Treeprocessor):
                 self.links.append(child.attrib['href'])
             self.agreggate_links(child)
 
+class Page:
+    def __init__(self):
+        self.body = None
+        self.links = None
+        self.backlinks = []
+
+
 def parse_weblog(top_path):
     weblog = {}
     # Initial conversion
     for page_path in pathlib.Path(top_path).glob('**/*.md'):
-        page = str(page_path.relative_to(top_path).stem)
+        page = '/' + str(page_path.relative_to(top_path)).replace('.md', '.html')
         print(f'Processing {page}')
-        weblog[page] = {}
+        weblog[page] = Page()
         parser = markdown.Markdown()
         link_agreggator = LinkAgreggator(parser)
         parser.treeprocessors.register(link_agreggator, 'links', 1)
         with open(page_path, "r", encoding="utf-8") as input_file:
-            weblog[page]["body"] = parser.convert(input_file.read())
-        weblog[page]["links"] = link_agreggator.links
+            weblog[page].body = parser.convert(input_file.read())
+        weblog[page].links = link_agreggator.links
 
-        # Append backlinks
-        for link in link_agreggator.links:
+    for p, v in weblog.items():
+        print(p)
+        print(v.links)
+        for link in v.links:
             if not link.startswith('http'):
-                link = link.replace('.html', '')
-                if 'backlinks' in weblog[link]:
-                    weblog[link]['backlinks'].append(page)
-                else:
-                    weblog[link]['backlinks'] = [page]
+                weblog[link].backlinks.append(page)
 
     return weblog
 
