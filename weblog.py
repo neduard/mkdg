@@ -3,19 +3,19 @@ import argparse
 import mistune
 
 class LinkAgreggator(mistune.HTMLRenderer):
-    def __init__(self):
+    def __init__(self, page):
         super().__init__(escape=True)
-        self.links = []
+        self.page = page
 
     def link(self, link, text=None, title=None):
-        self.links.append(link)
+        self.page.links.append(link)
         return super().link(link, text, title)
 
 
 class Page:
     def __init__(self):
         self.body = None
-        self.links = None
+        self.links = []
         self.backlinks = []
         self.path = None
 
@@ -30,12 +30,11 @@ def parse_weblog(top_path):
         weblog[page].path = page_path
 
         # Create a fresh parser for each page.
-        link_agreggator = LinkAgreggator()
+        link_agreggator = LinkAgreggator(weblog[page])
         md = mistune.create_markdown(renderer=link_agreggator)
 
         with open(page_path, 'r', encoding='utf-8') as input_file:
             weblog[page].body = md.parse(input_file.read())
-        weblog[page].links = link_agreggator.links
 
     for p, v in weblog.items():
         for link in v.links:
