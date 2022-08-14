@@ -1,6 +1,7 @@
 import pathlib
 import argparse
 import mistune
+import mistune.directives
 
 class LinkAgreggator(mistune.HTMLRenderer):
     def __init__(self, page):
@@ -12,11 +13,23 @@ class LinkAgreggator(mistune.HTMLRenderer):
         return super().link(link, text, title)
 
 
+class Metadata(mistune.directives.Directive):
+    def __init__(self, page):
+        self.page = page
+
+    def parse(self, block, m, state):
+        self.page.meta = dict(self.parse_options(m))
+
+    def __call__(self, md):
+        self.register_directive(md, 'meta')
+
+
 class Page:
     def __init__(self):
         self.body = None
         self.links = []
         self.backlinks = []
+        self.meta = None
         self.path = None
 
 
@@ -31,7 +44,8 @@ def parse_weblog(top_path):
 
         # Create a fresh parser for each page.
         link_agreggator = LinkAgreggator(weblog[page])
-        md = mistune.create_markdown(renderer=link_agreggator)
+        metadata_directive = Metadata(weblog[page])
+        md = mistune.create_markdown(renderer=link_agreggator, plugins=[metadata_directive])
 
         with open(page_path, 'r', encoding='utf-8') as input_file:
             weblog[page].body = md.parse(input_file.read())
@@ -55,7 +69,7 @@ def main(args=None):
     # TODO further processing
 
     for page_name, page in weblog.items():
-        print(f'{page_name} links={page.links} backlinks={page.backlinks}')
+        print(f'{page_name} links={page.links} backlinks={page.backlinks} metadata={page.meta}')
 
     # Useful for testing
     return weblog
