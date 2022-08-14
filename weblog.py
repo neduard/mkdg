@@ -2,26 +2,15 @@ import pathlib
 import argparse
 import mistune
 
-class LinkAgreggator(mistune.InlineParser):
-    def __init__(self, renderer, hard_wrap=True):
-        super().__init__(renderer, hard_wrap)
+class LinkAgreggator(mistune.HTMLRenderer):
+    def __init__(self):
+        super().__init__(escape=True)
         self.links = []
 
-    def parse_link(self, m, state):
-        super().parse_link(m, state)
+    def link(self, link, text=None, title=None):
+        self.links.append(link)
+        return super().link(link, text, title)
 
-        tokens = state.tokens
-        # TODO: understand / document how inline parsing works and
-        # how it produces tokens.
-        for token in tokens:
-            if token['type'] == 'image':
-                # Ignore image links
-                return
-            if token['type'] == 'link':
-                url = token['attrs']['url']
-                if url not in self.links:
-                    self.links.append(url)
-                return
 
 class Page:
     def __init__(self):
@@ -41,9 +30,8 @@ def parse_weblog(top_path):
         weblog[page].path = page_path
 
         # Create a fresh parser for each page.
-        link_agreggator = LinkAgreggator(mistune.HTMLRenderer(escape=True))
-        md = mistune.Markdown(renderer=link_agreggator.renderer,
-                              inline=link_agreggator)
+        link_agreggator = LinkAgreggator()
+        md = mistune.create_markdown(renderer=link_agreggator)
 
         with open(page_path, 'r', encoding='utf-8') as input_file:
             weblog[page].body = md.parse(input_file.read())
