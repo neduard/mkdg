@@ -2,58 +2,72 @@ import pathlib
 import argparse
 import mistune
 import mistune.directives
+import jinja2
 
 class LinkAgreggator(mistune.HTMLRenderer):
-    def __init__(self, page):
+    def __init__(self, post):
         super().__init__(escape=True)
-        self.page = page
+        self.post = post
 
     def link(self, link, text=None, title=None):
-        self.page.links.append(link)
+        self.post.links.append(link)
         return super().link(link, text, title)
 
 
 class Metadata(mistune.directives.Directive):
-    def __init__(self, page):
-        self.page = page
+    def __init__(self, post):
+        self.post = post
 
     def parse(self, block, m, state):
-        self.page.meta = dict(self.parse_options(m))
+        self.post.meta = dict(self.parse_options(m))
 
     def __call__(self, md):
         self.register_directive(md, 'meta')
 
 
-class Page:
-    def __init__(self):
+class Post:
+    def __init__(self, name):
+        self.name = name
         self.body = None
         self.links = []
         self.backlinks = []
         self.meta = None
-        self.path = None
 
 
 def parse_weblog(top_path):
     weblog = {}
+    posts_dir = top_path / 'posts'
 
-    for page_path in pathlib.Path(top_path).glob('**/*.md'):
-        page = '/' + str(page_path.relative_to(top_path)).replace('.md', '.html')
-        print(f'Processing {page}')
-        weblog[page] = Page()
-        weblog[page].path = page_path
+    for post_path in posts_dir.glob('*.md'):
+        name = post_path.name.replace('.md', '.html')
+        print(f'Processing {name}')
+        post = Post(name)
 
-        # Create a fresh parser for each page.
-        link_agreggator = LinkAgreggator(weblog[page])
-        metadata_directive = Metadata(weblog[page])
+        # Create a fresh parser for each post.
+        link_agreggator = LinkAgreggator(post)
+        metadata_directive = Metadata(post)
         md = mistune.create_markdown(renderer=link_agreggator, plugins=[metadata_directive])
 
-        with open(page_path, 'r', encoding='utf-8') as input_file:
-            weblog[page].body = md.parse(input_file.read())
+        with open(post_path, 'r', encoding='utf-8') as input_file:
+            post.body = md.parse(input_file.read())
+
+        # Add to weblog
+        weblog[name] = post
 
     for p, v in weblog.items():
         for link in v.links:
             if not link.startswith('http'):
-                weblog[link].backlinks.append(p)
+                weblog[link].backlinks.append(v)
+
+    return weblog
+
+def render_posts(weblog, env, out_path):
+    out_path.mkdir(parents=True, exist_ok=True)
+
+    for name, post in weblog.items():
+        template = env.get_template('post.html')
+        with open(out_path / name, 'w') as f:
+            f.write(template.render(post=post))
 
     return weblog
 
@@ -63,13 +77,17 @@ def parse_args(args):
     parser.add_argument('website_path', type=pathlib.Path, default='.')
     return parser.parse_args()
 
+
 def main(args=None):
     args = parse_args(args)
     weblog = parse_weblog(args.website_path)
-    # TODO further processing
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(args.website_path))
 
-    for page_name, page in weblog.items():
-        print(f'{page_name} links={page.links} backlinks={page.backlinks} metadata={page.meta}')
+    render_posts(weblog, env, args.website_path / 'dist' / 'posts')
+
+    for name, post in weblog.items():
+        print(f'{name} links={post.links} backlinks={post.backlinks} metadata={post.meta}')
+        
 
     # Useful for testing
     return weblog
