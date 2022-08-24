@@ -1,13 +1,15 @@
-<html>
+{% extends "base.html" %}
+{% block title %}{{post.title}}{% endblock %}
+{% block content %}
 
-    {{ post.body }}
+{{ post.body }}
 
-    Backlinks:
+Backlinks:
 
-    <ul>
-    {% for backlink in post.backlinks %}
-        <li> <a href="{{ backlink.name }}">{{ backlink.meta['title'] }}</a> </li>
-    {% endfor %}
-    </ul>
+<ul>
+{% for backlink in post.backlinks %}
+    <li> <a href="{{ backlink.name }}">{{ backlink.meta['title'] }}</a> </li>
+{% endfor %}
+</ul>
 
-</html>
+{% endblock %}

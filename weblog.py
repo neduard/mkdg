@@ -33,6 +33,12 @@ class Post:
         self.backlinks = []
         self.meta = None
 
+    @property
+    def title(self):
+        return self.meta['title']
+
+    # TODO: implement property for date.
+
 
 def parse_weblog(top_path):
     weblog = {}
@@ -85,9 +91,14 @@ def main(args=None):
 
     render_posts(weblog, env, args.website_path / 'dist' / 'posts')
 
+    # render index.html (imports base and overwrites content)
+    template = env.get_template('index.html')
+    with open(args.website_path / 'dist' / 'index.html', 'w') as f:
+        f.write(template.render(posts=weblog))
+    # TODO: render post-list.html ()
+
     for name, post in weblog.items():
         print(f'{name} links={post.links} backlinks={post.backlinks} metadata={post.meta}')
-        
 
     # Useful for testing
     return weblog
