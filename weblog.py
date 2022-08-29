@@ -1,5 +1,7 @@
 import pathlib
 import argparse
+import shutil
+
 import mistune
 import mistune.directives
 import jinja2
@@ -89,13 +91,23 @@ def main(args=None):
     weblog = parse_weblog(args.website_path)
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(args.website_path))
 
-    render_posts(weblog, env, args.website_path / 'dist' / 'posts')
+    output_dir = args.website_path / 'dist'
+    if output_dir.exists():
+        #shutil.rmtree(output_dir)
+        pass
+    render_posts(weblog, env,  output_dir / 'posts')
 
     # render index.html (imports base and overwrites content)
     template = env.get_template('index.html')
-    with open(args.website_path / 'dist' / 'index.html', 'w') as f:
+    with open(output_dir / 'index.html', 'w') as f:
         f.write(template.render(posts=weblog))
-    # TODO: render post-list.html ()
+
+    # Copy css/ folder
+    shutil.copytree(args.website_path / 'css', output_dir / 'css')
+
+    # Copy images/ folder
+    #TODO: this can include compression/optimization of the png files
+    shutil.copytree(args.website_path / 'images', output_dir / 'images')
 
     for name, post in weblog.items():
         print(f'{name} links={post.links} backlinks={post.backlinks} metadata={post.meta}')
