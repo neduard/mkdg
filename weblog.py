@@ -93,7 +93,7 @@ def main(args=None):
 
     output_dir = args.website_path / 'dist'
     if output_dir.exists():
-        #shutil.rmtree(output_dir)
+        shutil.rmtree(output_dir)
         pass
     render_posts(weblog, env,  output_dir / 'posts')
 
