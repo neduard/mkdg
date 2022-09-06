@@ -49,7 +49,6 @@ def parse_weblog(top_path):
 
     for post_path in posts_dir.glob('*.md'):
         name = post_path.name.replace('.md', '.html')
-        print(f'Processing {name}')
         post = Post(name)
 
         # Create a fresh parser for each post.
@@ -125,7 +124,7 @@ def main(args=None):
     shutil.copytree(args.website_path / 'images', output_dir / 'images')
 
     for name, post in weblog.items():
-        print(f'{name} links={post.links} backlinks={post.backlinks} metadata={post.meta}')
+        print(f'{name} links={post.links} backlinks={[l.name for l in post.backlinks]} metadata={post.meta}')
 
     # Useful for testing
     return weblog
