@@ -2,6 +2,7 @@ import pathlib
 import argparse
 import shutil
 
+import graphviz
 import mistune
 import mistune.directives
 import jinja2
@@ -101,6 +102,20 @@ def main(args=None):
     template = env.get_template('index.html')
     with open(output_dir / 'index.html', 'w') as f:
         f.write(template.render(posts=weblog))
+
+    # render Knowledge Graph
+    dot = graphviz.Digraph()
+    for name, post in weblog.items():
+        dot.node(name, label=name, URL=f"posts/{name}")
+
+    for name, post in weblog.items():
+        edges = [(name, p2.name) for p2 in post.backlinks]
+        dot.edges(edges)
+    svg_str = str(dot.pipe('svg'), 'utf-8')
+    svg_str_trimmed = svg_str[svg_str.index('<svg'):].strip()
+    template = env.get_template('/knowledge_graph.html')
+    with open(output_dir / 'knowledge_graph.html', 'w') as f:
+        f.write(template.render(svg=svg_str_trimmed))
 
     # Copy css/ folder
     shutil.copytree(args.website_path / 'css', output_dir / 'css')
