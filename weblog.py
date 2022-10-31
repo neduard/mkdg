@@ -67,9 +67,6 @@ def main(args=None):
     with open(output_dir / 'index.html', 'w') as f:
         f.write(template.render(posts=weblog))
 
-    # Copy css/ folder
-    shutil.copytree(args.website_path / 'css', output_dir / 'css')
-
     # Copy images/ folder
     #TODO: this can include compression/optimization of the png files
     shutil.copytree(args.website_path / 'images', output_dir / 'images')
