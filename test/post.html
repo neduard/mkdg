@@ -4,11 +4,11 @@
 
 {{ post.body }}
 
-Backlinks:
+<p>Backlinks:</p>
 
 <ul>
 {% for backlink in post.backlinks %}
-    <li> <a href="{{ backlink.name }}">{{ backlink.meta['title'] }}</a> </li>
+    <li> <a href="{{ backlink.name }}">{{ backlink.title }}</a> </li>
 {% endfor %}
 </ul>
 
