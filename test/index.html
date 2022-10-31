@@ -1,8 +1,14 @@
 {% extends "base.html" %}
+{% block content %}
+<h1>Welcome</h1>
+Hi.  Welcome to the demo website.
+
 <h1>Posts</h1>
 
-{% block content %}
-
 {{ list_posts(posts) }}
+
+<div>
+Generated using <a href="https://github.com/neduard/simple-digital-garden-generator/blob/main/weblog.py">a few lines of python</a><br/>
+</div>
 
 {% endblock %}

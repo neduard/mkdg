@@ -1,15 +1,16 @@
 {% extends "base.html" %}
-{% block title %}{{post.title}}{% endblock %}
 {% block content %}
 
 {{ post.body }}
 
-<p>Backlinks:</p>
 
+{% if post.backlinks %}
+<p><i>Backlinks:</i></p>
 <ul>
 {% for backlink in post.backlinks %}
     <li> <a href="{{ backlink.name }}">{{ backlink.title }}</a> </li>
 {% endfor %}
 </ul>
+{% endif %}
 
 {% endblock %}

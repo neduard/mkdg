@@ -24,7 +24,7 @@ class Post:
 def parse_weblog(top_path):
     post_paths = (top_path / 'posts').glob('*.html')
 
-    weblog = { path.name : Post(path) for path in post_paths }
+    weblog = { path.name : Post(path) for path in sorted(post_paths) }
 
     # Create backlinks.
     for name, post in weblog.items():
