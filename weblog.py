@@ -47,7 +47,8 @@ def render_posts(weblog, env, out_path):
 
 def parse_args(args):
     parser = argparse.ArgumentParser(description='Simple weblog generator (with backlinks support!)')
-    parser.add_argument('website_path', type=pathlib.Path, default='.')
+    parser.add_argument('website_path', type=pathlib.Path)
+    parser.add_argument('--output_dir', type=pathlib.Path, default='dist/')
     return parser.parse_args()
 
 
@@ -56,20 +57,19 @@ def main(args=None):
     weblog = parse_weblog(args.website_path)
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(args.website_path))
 
-    output_dir = args.website_path / 'dist'
-    if output_dir.exists():
-        shutil.rmtree(output_dir)
+    if args.output_dir.exists():
+        shutil.rmtree(args.output_dir)
         pass
-    render_posts(weblog, env,  output_dir / 'posts')
+    render_posts(weblog, env,  args.output_dir / 'posts')
 
     # render index.html (imports base and overwrites content)
     template = env.get_template('index.html')
-    with open(output_dir / 'index.html', 'w') as f:
+    with open(args.output_dir / 'index.html', 'w') as f:
         f.write(template.render(posts=weblog))
 
     # Copy images/ folder
     #TODO: this can include compression/optimization of the png files
-    shutil.copytree(args.website_path / 'images', output_dir / 'images')
+    shutil.copytree(args.website_path / 'images', args.output_dir / 'images')
 
     for name, post in weblog.items():
         print(f'{name} links={post.links} '
