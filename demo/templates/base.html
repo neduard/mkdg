@@ -1,7 +1,11 @@
 {% macro list_posts(posts) -%} 
     <ul>
     {% for post in posts.values() %}
-        <li><a href="posts/{{post.name}}">{{post.title}}</a></li>
+        <li><a href="{{post.name}}">{{post.title}}</a>
+            {% if post.date %}
+                - {{post.date.strftime('%B %d, %Y')}}
+            {% endif %}
+        </li>
     {% endfor %}
     </ul>
 {%- endmacro  %}
@@ -17,7 +21,8 @@
     <body>
         <div id="header">
             <a href="/">Home</a>
-            <a href="/posts/about.html">About</a>
+            <a href="/about.html">About</a>
+            <a href="/page-list.html">Pages</a>
         </div>
 
         <div id="content">

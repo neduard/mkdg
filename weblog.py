@@ -1,4 +1,5 @@
 import argparse
+import datetime
 import pathlib
 import re
 import shutil
@@ -7,10 +8,17 @@ import jinja2
 
 title_re = re.compile(r'<h1>(.+)</h1>\n')
 link_re = re.compile(r'<a href="(.+)">')
+# date is optional and is of the form YYYY-MM-DD
+post_name_re = re.compile(r'((\d{4})-(\d{2})-(\d{2})-)?.+')
 
 class Post:
     def __init__(self, path):
-        self.name = path.name
+        parsed_name = post_name_re.match(path.name)
+        self.name = parsed_name.group(0)
+        if parsed_name.group(1):
+            self.date = datetime.date(*map(int, parsed_name.groups()[1:4]))
+        else:
+            self.date = None
         # Read file.
         self.lines = list(open(path, "r"))
         self.body = ''.join(self.lines)
@@ -22,7 +30,7 @@ class Post:
 
 
 def parse_weblog(top_path):
-    post_paths = (top_path / 'posts').glob('*.html')
+    post_paths = top_path.glob('*.html')
 
     weblog = { path.name : Post(path) for path in sorted(post_paths) }
 
@@ -55,16 +63,16 @@ def parse_args(args):
 def main(args=None):
     args = parse_args(args)
     weblog = parse_weblog(args.website_path)
-    env = jinja2.Environment(loader=jinja2.FileSystemLoader(args.website_path))
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(args.website_path / 'templates'))
 
     if args.output_dir.exists():
         shutil.rmtree(args.output_dir)
         pass
-    render_posts(weblog, env,  args.output_dir / 'posts')
+    render_posts(weblog, env,  args.output_dir)
 
     # render index.html (imports base and overwrites content)
-    template = env.get_template('index.html')
-    with open(args.output_dir / 'index.html', 'w') as f:
+    template = env.get_template('page-list.html')
+    with open(args.output_dir / 'page-list.html', 'w') as f:
         f.write(template.render(posts=weblog))
 
     # Copy images/ folder
@@ -74,7 +82,8 @@ def main(args=None):
     for name, post in weblog.items():
         print(f'{name} links={post.links} '
               f'backlinks={[l.name for l in post.backlinks]} '
-              f'title="{post.title}"')
+              f'title="{post.title}" '
+              f'date="{post.date}"')
 
     # Useful for testing
     return weblog

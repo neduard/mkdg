@@ -3,6 +3,9 @@
 
 {{ post.body }}
 
+{% if post.date %}
+<p>First written on: {{ post.date.strftime('%B %d, %Y') }}</p>
+{% endif %}
 
 {% if post.backlinks %}
 <p><i>Backlinks:</i></p>
