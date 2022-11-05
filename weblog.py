@@ -29,18 +29,16 @@ class Post:
         self.backlinks = []
 
 
-def parse_weblog(top_path):
-    post_paths = top_path.glob('*.html')
-
-    weblog = { path.name : Post(path) for path in sorted(post_paths) }
-
-    # Create backlinks.
-    for name, post in weblog.items():
-        for link in post.links:
+def create_backlinks(pages):
+    for name, page in pages.items():
+        for link in page.links:
             if not link.startswith('http'):
-                weblog[link].backlinks.append(post)
+                pages[link].backlinks.append(page)
 
-    return weblog
+
+def create_pages(paths):
+    return { path.name : Post(path) for path in sorted(paths) }
+
 
 def render_posts(weblog, env, out_path):
     out_path.mkdir(parents=True, exist_ok=True)
@@ -62,12 +60,13 @@ def parse_args(args):
 
 def main(args=None):
     args = parse_args(args)
-    weblog = parse_weblog(args.website_path)
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(args.website_path / 'templates'))
 
     if args.output_dir.exists():
         shutil.rmtree(args.output_dir)
         pass
+    weblog = create_pages(args.website_path.glob('*.html'))
+    create_backlinks(weblog)
     render_posts(weblog, env,  args.output_dir)
 
     # render index.html (imports base and overwrites content)
