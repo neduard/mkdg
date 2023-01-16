@@ -65,27 +65,27 @@ def main(args=None):
     if args.output_dir.exists():
         shutil.rmtree(args.output_dir)
         pass
-    weblog = create_pages(args.website_path.glob('*.html'))
-    create_backlinks(weblog)
-    render_posts(weblog, env,  args.output_dir)
+    pages = create_pages(args.website_path.glob('*.html'))
+    create_backlinks(pages)
+    render_posts(pages, env,  args.output_dir)
 
-    # render index.html (imports base and overwrites content)
+    # Render page-list.html
     template = env.get_template('page-list.html')
     with open(args.output_dir / 'page-list.html', 'w') as f:
-        f.write(template.render(posts=weblog))
+        f.write(template.render(posts=pages))
 
     # Copy images/ folder
     #TODO: this can include compression/optimization of the png files
     shutil.copytree(args.website_path / 'images', args.output_dir / 'images')
 
-    for name, post in weblog.items():
+    for name, post in pages.items():
         print(f'{name} links={post.links} '
               f'backlinks={[l.name for l in post.backlinks]} '
               f'title="{post.title}" '
               f'date="{post.date}"')
 
     # Useful for testing
-    return weblog
+    return pages
 
 
 if __name__ == '__main__':
