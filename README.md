@@ -18,21 +18,13 @@ python3 -m venv venv
 
 0. activate venv environment `source ./venv/bin/activate`
 
-1. Setup a plain http server: `python3 -m http.server --directory test/dist/`
+1. Setup a plain http server: `python3 -m http.server --directory dist/`
 
 2. Run:
 ```
-$ python3 weblog.py test/
-p1.html links=[] backlinks=['p2.html', 'p3.html'] metadata={'title': 'This is page 1', 'moreinfo': 'some more info'}
-p2.html links=['p1.html'] backlinks=['p3.html'] metadata={'title': '"This is page 2"'}
-p3.html links=['p1.html', 'p2.html'] backlinks=[] metadata={'title': '"This is page 3"'}
+$ python3 weblog.py demo/
 ```
 
-3. Check out http://0.0.0.0:8000/
+3. Check out http://localhost:8000/
 
 4. Hack away.
-
-
-# Notes
-
-At the moment, the CSS theme and base.html are actually from the [Hakyll](https://jaspervdj.be/hakyll/) example site.
