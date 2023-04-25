@@ -1,3 +1,8 @@
 venv/
 test/dist/
+dist/
+
 *.swp
+
+# Rust
+target/
