@@ -1,21 +1,23 @@
 use clap::{Parser};
 use regex::Regex;
+use rouille::Response;
 use std::fs;
 use std::io::{BufRead, BufReader};
 use std::path::{PathBuf, Path};
-use chrono::NaiveDate;
+use std::str::FromStr;
 
-use minijinja::{Environment, Source, context};
+use minijinja::{Environment, Source, context, AutoEscape};
+use serde::Serialize;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 struct Post {
     name: String,
-    date: Option<NaiveDate>,
+    date_y_m_d: Option<(u32, u32, u32)>,
     lines: Vec<String>,
     body: String,
     title: String,
     links: Vec<String>,
-    backlinks: Vec<String>,
+    backlinks: Vec<(String, String)>,
 }
 
 impl Post {
@@ -28,11 +30,11 @@ impl Post {
         let name = path.file_name().unwrap().to_str().unwrap().to_owned();
         println!("name: {name:?}");
         let parsed_name = post_name_re.captures(&name).unwrap();
-        let date = if let Some(date_match) = parsed_name.get(1) {
-            let year: i32 = parsed_name.get(2).unwrap().as_str().parse().unwrap();
+        let date_y_m_d = if let Some(_) = parsed_name.get(1) {
+            let year: u32 = parsed_name.get(2).unwrap().as_str().parse().unwrap();
             let month: u32 = parsed_name.get(3).unwrap().as_str().parse().unwrap();
             let day: u32 = parsed_name.get(4).unwrap().as_str().parse().unwrap();
-            Some(NaiveDate::from_ymd(year, month, day))
+            Some((year, month, day))
         } else {
             None
         };
@@ -50,7 +52,7 @@ impl Post {
 
         Post {
             name,
-            date,
+            date_y_m_d,
             lines,
             body,
             title,
@@ -79,10 +81,11 @@ fn parse_site(top_path: &std::path::Path) -> std::collections::HashMap<String, P
     let _weblog_clone = weblog.iter();
     
     // Create backlinks.
-    let backlink_pairs: Vec<(String, Vec<String>)> = weblog
+    let backlink_pairs: Vec<(String, String, Vec<String>)> = weblog
         .iter()
         .map(|(name, post)| 
             (name.clone(),
+             post.title.clone(),
              post
                 .links 
                 .clone()
@@ -92,11 +95,11 @@ fn parse_site(top_path: &std::path::Path) -> std::collections::HashMap<String, P
                 .collect()))
         .collect();
          
-    for (name, links) in backlink_pairs {
+    for (name, title, links) in backlink_pairs {
         println!("Name {name}");
         for link in links {
             println!("  Link: \"{}\"", &link);
-            weblog.get_mut(&link).unwrap().backlinks.push(name.clone());
+            weblog.get_mut(&link).unwrap().backlinks.push((name.clone(), title.clone()));
         }
     }
     weblog
@@ -112,16 +115,63 @@ struct Args {
     output_dir: String,
 }
 
+fn render_posts(
+    weblog: &std::collections::HashMap<String, Post>,
+    env: &Environment,
+    out_path: &PathBuf,
+) {
+    fs::create_dir_all(&out_path).unwrap();
+
+    for post in weblog.values() {
+        let template = env.get_template("post.html").unwrap();
+        let file = fs::File::create(out_path.join(&post.name)).unwrap();
+        template.render_to_write(context!{post => post}, file).unwrap();
+    }
+}
+
 fn main() {
     let args = Args::parse();
-    let top_path = Path::new(&args.website_path);
-    let weblog = parse_site(&top_path);
-    
-    let templates_path = Path::new(&args.website_path).join("templates");
+    let website_path= Path::new(&args.website_path);
+    let weblog = parse_site(&website_path);
+    println!("{:?}", weblog.values()) ;
+    let templates_path = Path::new(&args.website_path.clone()).join("templates");
     
     let mut env = Environment::new();
+    env.set_auto_escape_callback(|_| AutoEscape::None);
     
     env.set_source(Source::from_path(templates_path));
-    let template = env.get_template("base.html").unwrap();
-    println!("{}", template.render(context! {name => "Eduard" }).unwrap());
+    let template = env.get_template("page-list.html").unwrap();
+    
+    let output_dir = PathBuf::from_str(&args.output_dir).unwrap();
+    render_posts(&weblog, &env, &output_dir);
+    
+    let file = fs::File::create(output_dir.join("page-list.html")).unwrap();
+    template.render_to_write(
+        context!
+            {posts => weblog.iter().collect::<Vec<_>>()},
+        file).unwrap();
+        
+    for post in weblog.values() {
+        println!(
+            "{} links={:?} backlinks={:?} title=\"{}\"",
+            post.name, post.links, post.backlinks, post.title
+        );
+    }
+        
+    rouille::start_server("127.0.0.1:8080", move |request| {
+        let request_path = format!("{}/{}", output_dir.to_str().unwrap(), request.url());
+
+        // Check if the requested file exists
+        if Path::new(&request_path).is_file() {
+            let file = std::fs::File::open(request_path).unwrap();
+            
+            Response::from_file("text/html", file)
+        } else {
+            let file = std::fs::File::open(
+                format!("{}/index.html", output_dir.to_str().unwrap())).unwrap();
+            // Serve the default index.html file if the requested file is not found
+            
+            Response::from_file("text/html", file)
+        }
+    });
 }

@@ -1,0 +1,33 @@
+{% macro list_posts(posts) -%} 
+    <ul>
+    {% for (name, post) in posts %}
+        <li><a href="{{post.name}}">{{post.title}}</a>
+            {% if post.date_y_m_d %}
+                - {{post.date_y_m_d[1]}} {{post.date_y_m_d[2]}}, {{post.date_y_m_d[0]}}
+            {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
+{%- endmacro  %}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>My simple website</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/spcss@0.8.0" />
+    </head>
+    <body>
+        <div id="header">
+            <a href="/">Home</a>
+            <a href="/about.html">About</a>
+            <a href="/page-list.html">Pages</a>
+        </div>
+
+        <div id="content">
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>
+

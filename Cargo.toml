@@ -10,3 +10,6 @@ minijinja = { version = "0.32.1", features = ["source"] }
 clap = { version = "4.2.4", features = ["derive"] }
 chrono = { version = "0.4.24" }
 regex = { version = "1.8.1" }
+serde = { version = "1.0.160", features = ["derive"] }
+# Could've used Warp but that's async and we don't need async deps like tokio.
+rouille = "3.6.2"
