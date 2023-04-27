@@ -1,9 +1,9 @@
-{% macro list_posts(posts) -%} 
+{% macro list_pages(pages) -%} 
     <ul>
-    {% for (name, post) in posts %}
-        <li><a href="{{post.name}}">{{post.title}}</a>
-            {% if post.date_y_m_d %}
-                - {{post.date_y_m_d[1]}} {{post.date_y_m_d[2]}}, {{post.date_y_m_d[0]}}
+    {% for page in pages %}
+        <li><a href="{{page.name}}">{{page.title}}</a>
+            {% if page.date_formatted %}
+                - {{ page.date_formatted }}
             {% endif %}
         </li>
     {% endfor %}
