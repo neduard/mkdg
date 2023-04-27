@@ -15,17 +15,12 @@ pub struct Page {
 }
 
 impl Page {
-    fn new(path: &std::path::Path) -> Page {
+    fn from_string(name: String, body: String) -> Page {
         let title_re = Regex::new(r"<h1>(.+?)</h1>").unwrap();
         // Use ? character to specify non-greedy matching (minimal)
         let link_re = Regex::new(r#"<a href="(.+?)">"#).unwrap();
         let date_re = Regex::new(r"(\d{4})-(\d{2})-(\d{2})-.+").unwrap();
         
-        let name = path.file_name().unwrap().to_str().to_owned()
-            .expect(&format!("Unable to extract file name for {:?}", path)).to_owned();
-        
-        let body = std::fs::read_to_string(path)
-            .expect(&format!("Unable to read {}", path.to_str().unwrap()));
             
         let title = title_re.captures(&body)
             .expect(&format!("Unable to find title in {}", &body))[1].to_owned();
@@ -65,6 +60,35 @@ impl Page {
             links,
             backlinks: Vec::new(),
         }
+        
+    }
+    
+    fn from_html(path: &std::path::Path) -> Page {
+        let name = path.file_name().unwrap().to_str().to_owned()
+            .expect(&format!("Unable to extract file name for {:?}", path)).to_owned();
+        let body = std::fs::read_to_string(path)
+            .expect(&format!("Unable to read {}", path.to_str().unwrap()));
+        Page::from_string(name, body)
+    }
+    
+    fn from_md(path: &std::path::Path) -> Page {
+        let name : String = path.file_name().unwrap().to_os_string().into_string()
+            .expect(&format!("Unable to extract file name for {:?}", path))
+            .replace(".md", ".html");
+        let body_md : String = std::fs::read_to_string(path)
+            .expect(&format!("Unable to read {}", path.to_str().unwrap()));
+        let body = markdown::to_html_with_options(
+                &body_md,
+                &markdown::Options {
+                    compile: markdown::CompileOptions {
+                        allow_dangerous_html: true,
+                        ..markdown::CompileOptions::gfm()
+                    },
+                    ..markdown::Options::gfm()
+                })
+            .expect("Unable to parse markdown");
+        Page::from_string(name, body)
+        
     }
 }
 
@@ -72,10 +96,18 @@ pub fn load_pages(top_path: &std::path::Path) -> Vec<Page> {
     let mut pages_map= top_path
         .read_dir().expect("Expected a directory")
         .map(|entry| entry.unwrap().path())
-        .filter(|path| path.is_file() && path.extension().map_or(false, |extension| extension == "html"))
-        .map(|path| {
-            let page = Page::new(&path);
-            (page.name.clone(), page)
+        .filter(|path| path.is_file())
+        .filter_map(|path| {
+            let extention = path.extension()?;
+            if extention == "html" {
+                let page = Page::from_html(&path);
+                Some((page.name.clone(), page))
+            } else if extention == "md" {
+                let page = Page::from_md(&path);
+                Some((page.name.clone(), page))
+            } else {
+                None
+            }
         })
         .collect::<std::collections::HashMap<_, _>>();
     
@@ -89,7 +121,7 @@ pub fn load_pages(top_path: &std::path::Path) -> Vec<Page> {
              page.links.iter()
                 .filter_map(|link|
                     // Only keep the links that don't start with http.
-                    if !link.starts_with("http") {
+                    if !link.starts_with("http") && link.ends_with(".html") {
                         Some((*link).clone())
                     } else {
                         None
@@ -102,7 +134,9 @@ pub fn load_pages(top_path: &std::path::Path) -> Vec<Page> {
         println!("Backlinks for {name}");
         for link in links {
             println!("  Link: \"{link}\"");
-            pages_map.get_mut(&link).unwrap().backlinks.push((name.clone(), title.clone()));
+            pages_map.get_mut(&link)
+                .expect("Unable to find link.  Maybe unexistent page?") 
+                .backlinks.push((name.clone(), title.clone()));
         }
     }
     

@@ -15,3 +15,4 @@ serde = { version = "1.0.160", features = ["derive"] }
 rouille = "3.6.2"
 
 tempfile = "3.5.0"
+markdown = "1.0.0-alpha.9"
