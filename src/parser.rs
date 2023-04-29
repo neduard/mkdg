@@ -18,7 +18,7 @@ impl Page {
     fn from_string(name: String, body: String) -> Page {
         let title_re = Regex::new(r"<h1>(.+?)</h1>").unwrap();
         // Use ? character to specify non-greedy matching (minimal)
-        let link_re = Regex::new(r#"<a href="(.+?)">"#).unwrap();
+        let link_re = Regex::new(r#"<a href="(.+?)".*>"#).unwrap();
         let date_re = Regex::new(r"(\d{4})-(\d{2})-(\d{2})-.+").unwrap();
 
 
