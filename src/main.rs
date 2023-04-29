@@ -7,8 +7,6 @@ use std::str::FromStr;
 
 use minijinja::{Environment, Source, context, AutoEscape};
 
-use crate::parser::load_pages;
-
 mod parser;
 
 #[derive(Parser,Debug)]
@@ -38,7 +36,7 @@ fn render_pages(
 fn main() {
     let args = Args::parse();
     let website_path= Path::new(&args.website_path);
-    let pages = load_pages(&website_path);
+    let pages = parser::load_pages(&website_path);
     println!("{:?}", pages) ;
     let templates_path = Path::new(&args.website_path.clone()).join("templates");
     
