@@ -104,7 +104,15 @@ impl Page {
             },
         ).expect("Unable to parse markdown");
         Page::from_string(name, body)
-
+    }
+    
+    pub fn word_count(self: &Self) -> usize {
+        let html_tag = Regex::new(r"<.+?>").unwrap();
+        html_tag
+            .replace_all(&self.body, " ")
+            .split_whitespace()
+            .filter(|str| str.len() > 2)
+            .count()
     }
 }
 
@@ -199,6 +207,13 @@ mod tests {
             b"<h1>Title</h1><br>
                 <p>Can't have enough <a href=\"2022-02-22-test_page_3.html\">links</a></p>",
         ).expect("Unable to write page 3");
+        
+        std::fs::write(
+            &dir.join("word_count.html"),
+            b"<h1>Title</h1><br>
+                <p>Can't have <b>enough</b> words with <a href=\"2022-02-22-test_page_3.html\">
+                links</a></p>.  Also . s in gl e && do u bl e    l e tt er s don't count. !!!",
+        ).expect("Unable to write page 3");
 
     }
 
@@ -211,7 +226,10 @@ mod tests {
         println!("Pages should be sorted alphabetically");
         assert_eq!(pages[0].name, "2022-02-22-test_page_3.html");
         assert_eq!(pages[1].name, "2022-02-23-test_page_4.html");
+        assert_eq!(pages[1].word_count(), 5);
         assert_eq!(pages[2].name, "test_page_1.html");
         assert_eq!(pages[3].name, "test_page_2.html");
+        assert_eq!(pages[4].name, "word_count.html");
+        assert_eq!(pages[4].word_count(), 11);
     }
 }
