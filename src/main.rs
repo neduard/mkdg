@@ -19,18 +19,33 @@ struct Args {
     output_dir: String,
 }
 
-fn render_pages(
+fn render_website(
     pages: &Vec<Page>,
     env: &Environment,
-    out_path: &PathBuf,
+    output_dir: &PathBuf,
 ) {
-    fs::create_dir_all(&out_path).unwrap();
+    fs::create_dir_all(&output_dir).unwrap();
 
+    // Create pages.
+    let template = env.get_template("page.html").unwrap();
     for page in pages {
-        let template = env.get_template("page.html").unwrap();
-        let file = fs::File::create(out_path.join(&page.name)).unwrap();
+        let file = fs::File::create(output_dir.join(&page.name)).unwrap();
         template.render_to_write(context!{page}, file).unwrap();
     }
+    
+    // Create page list.
+    let template = env.get_template("page-list.html").unwrap();
+    let file = fs::File::create(output_dir.join("page-list.html")).unwrap();
+    template.render_to_write(
+        context! { pages, },
+        file).unwrap();
+    
+    // Create index.
+    let template = env.get_template("index.html").unwrap();
+    let file = fs::File::create(output_dir.join("index.html")).unwrap();
+    template.render_to_write(
+        context! { word_count => pages.iter().fold(0, |acc, p| acc + p.word_count()) },
+        file).unwrap();
 }
 
 fn main() {
@@ -41,23 +56,17 @@ fn main() {
     
     let mut env = Environment::new();
     env.set_auto_escape_callback(|_| AutoEscape::None);
-    
     env.set_source(Source::from_path(templates_path));
-    let template = env.get_template("page-list.html").unwrap();
     
     let output_dir = PathBuf::from_str(&args.output_dir).unwrap();
-    render_pages(&pages, &env, &output_dir);
+    render_website(&pages, &env, &output_dir);
     
-    let file = fs::File::create(output_dir.join("page-list.html")).unwrap();
-    template.render_to_write(
-        context!
-            {pages => pages},
-        file).unwrap();
-        
+    
+      
     for page in pages {
         println!(
-            "{} links={:?} backlinks={:?} title=\"{}\"",
-            page.name, page.links, page.backlinks, page.title
+            "{} links={:?} backlinks={:?} title=\"{}\" words={}",
+            page.name, page.links, page.backlinks, page.title, page.word_count()
         );
     }
         
