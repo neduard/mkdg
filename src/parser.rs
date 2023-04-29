@@ -57,8 +57,6 @@ impl Page {
             None
         };
 
-        println!("Title: {}", title);
-
         Page {
             name,
             date_formatted: date.map(|d| d.format("%B %d, %Y").to_string()),
@@ -152,9 +150,7 @@ pub fn load_pages(input_dir: &std::path::Path) -> Vec<Page> {
         .collect(); // What are for loops?
 
     for (name, title, links) in backlinks {
-        println!("Backlinks for {name}");
         for link in links {
-            println!("  Link: \"{link}\"");
             pages_map
                 .get_mut(&link)
                 .expect("Unable to find link.  Maybe unexistent page?")

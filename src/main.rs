@@ -37,7 +37,6 @@ fn main() {
     let args = Args::parse();
     let website_path= Path::new(&args.website_path);
     let pages = parser::load_pages(&website_path);
-    println!("{:?}", pages) ;
     let templates_path = Path::new(&args.website_path.clone()).join("templates");
     
     let mut env = Environment::new();
