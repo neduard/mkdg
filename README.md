@@ -4,23 +4,13 @@ A simple digital garden generator with backlink support.
 
 Objectives:
 
-1. Simplicity.  This is a script, not a framework.
-2. Hackability.  Users are encouraged to read the source code and ajust to their own preferences.  PRs are welcome as long as they don't conflict with objective no. 1
+1. Simplicity.  This is more like a script, not a framework.
 
-# Installation
+# Setup
 
-```
-python3 -m venv venv
-./venv/bin/pip3 install -r requirements.txt
-```
+1. [Install Rust](https://www.rust-lang.org/tools/install)
+2. `cargo run -- `
 
-# Running
-
-0. activate venv environment `source ./venv/bin/activate`
-
-1. Setup a plain http server: `python3 -m http.server --directory dist/`
-
-2. Run:
 ```
 $ python3 weblog.py demo/
 ```
@@ -47,7 +37,7 @@ A few simplifying assumptions are made:
 3. Distinguish between dated posts (YYYY-MM-DD- prefix) and regular pages purely from name
   * the two are still separated when listing the files in the folder
   * allows to distinguish one-off wirtings vs ongoing updating of a topic
-4. Links are detected using `<a href="(.+)?">` 
+4. Links are detected using `<a href="(.+)?">`
   * Allows us to easily filter local links by checking if a link is prefixed with `http`
   * Regular pages + backlinks essentially mimic tags (but with the extra ability to add content)
 5. Title is of the form `<h1>Title With Spaces</h1>`
