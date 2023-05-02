@@ -48,21 +48,30 @@ fn render_website(
         file).unwrap();
 }
 
+fn process_images<P, Q>(from: P, to: Q)
+where P: AsRef<Path>, Q: AsRef<Path> {
+     // TODO: this can include compression/optimization of the png files
+     fs_extra::copy_items(&vec![from], to, &fs_extra::dir::CopyOptions::default())
+        .expect("Unable to copy images");
+}
+
 fn main() {
     let args = Args::parse();
     let website_path= Path::new(&args.website_path);
     let pages = parser::load_pages(&website_path);
-    let templates_path = Path::new(&args.website_path.clone()).join("templates");
     
     let mut env = Environment::new();
     env.set_auto_escape_callback(|_| AutoEscape::None);
-    env.set_source(Source::from_path(templates_path));
+    env.set_source(Source::from_path(website_path.join("templates")));
     
     let output_dir = PathBuf::from_str(&args.output_dir).unwrap();
     render_website(&pages, &env, &output_dir);
     
+    fs::copy(website_path.join("sp-0.9.0.css"), &output_dir.join("default.css"))
+        .expect("Unable to copy css");    
+        
+    process_images(website_path.join("images"), output_dir.join("images"));
     
-      
     for page in pages {
         println!(
             "{} links={:?} backlinks={:?} title=\"{}\" words={}",
@@ -70,14 +79,20 @@ fn main() {
         );
     }
         
-    rouille::start_server("127.0.0.1:8080", move |request| {
+    static ADDRESS : &str = "127.0.0.1:8000";
+    println!("Starting demo server on http://{ADDRESS}");
+    rouille::start_server(ADDRESS, move |request| {
         let request_path = format!("{}/{}", output_dir.to_str().unwrap(), request.url());
 
         // Check if the requested file exists
         if Path::new(&request_path).is_file() {
+            let content_type = if request_path.ends_with("css") {
+                "text/css"
+            } else {
+                "text/html"
+            };
             let file = std::fs::File::open(request_path).unwrap();
-            
-            Response::from_file("text/html", file)
+            Response::from_file(content_type, file)
         } else {
             let file = std::fs::File::open(
                 format!("{}/index.html", output_dir.to_str().unwrap())).unwrap();
