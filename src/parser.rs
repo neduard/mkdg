@@ -18,7 +18,8 @@ impl Page {
     fn from_string(name: String, body: String) -> Page {
         let title_re = Regex::new(r"<h1>(.+?)</h1>").unwrap();
         // Use ? character to specify non-greedy matching (minimal)
-        let link_re = Regex::new(r#"<a href="(.+?)".*>"#).unwrap();
+        // Also filter out page headings if present.
+        let link_re = Regex::new(r#"<a href="([^#]+?)(#.*)?".*>"#).unwrap();
         let date_re = Regex::new(r"(\d{4})-(\d{2})-(\d{2})-.+").unwrap();
 
 
@@ -205,7 +206,7 @@ mod tests {
         std::fs::write(
             &dir.join("2022-02-23-test_page_4.html"),
             b"<h1>Title</h1><br>
-                <p>Can't have enough <a href=\"2022-02-22-test_page_3.html\">links</a></p>",
+                <p>Can't have enough <a href=\"2022-02-22-test_page_3.html#header\">links</a></p>",
         ).expect("Unable to write page 3");
         
         std::fs::write(
@@ -231,5 +232,9 @@ mod tests {
         assert_eq!(pages[3].name, "test_page_2.html");
         assert_eq!(pages[4].name, "word_count.html");
         assert_eq!(pages[4].word_count(), 11);
+        
+        println!("Section links are ignored");
+        assert_eq!(pages[0].links, vec!["2022-02-22-test_page_3.html"]);
+        assert_eq!(pages[1].links, vec!["2022-02-22-test_page_3.html"]);
     }
 }
