@@ -36,19 +36,19 @@ A summary of the feature list can also be found in the
 Here is a more detailed breakdown:
 
 1. Support both HTML and Markdown
-  * Markdown is first "compiled" into HTML
-  * Plain HTML allows maximum flexibility
-1. All pages are in a fixed directory structure.
-  * this removes the need to recurse into directories
-  * it also means that each page can be identified by *just* it's name and not the full path
-1. Links are detected using `<a href="(.+)?">`
-  * Allows us to easily filter local links by checking if a link is prefixed with `http`
-  * Regular pages + backlinks essentially mimic tags (but with the extra ability to add content)
-  * Building the backlink table allows us to check for any dangling ones
-1. Title of a page is of the form `<h1>Title With Spaces</h1>`
-  * Might be a bit clunky, but we can easily search for it using a regex
-1. Distinguish between dated posts (YYYY-MM-DD- prefix) and regular pages
+    * Markdown is first "compiled" into HTML
+    * Plain HTML allows maximum flexibility
+2. All pages are in a fixed directory structure.
+    * this removes the need to recurse into directories
+    * it also means that each page can be identified by *just* it's name and not the full path
+3. Links are detected using `<a href="(.+)?">`
+    * Allows us to easily filter local links by checking if a link is prefixed with `http`
+    * Regular pages + backlinks essentially mimic tags (but with the extra ability to add content)
+    * Building the backlink table allows us to check for any dangling ones
+4. Title of a page is of the form `<h1>Title With Spaces</h1>`
+    * Might be a bit clunky, but we can easily search for it using a regex
+5. Distinguish between dated posts (YYYY-MM-DD- prefix) and regular pages
 purely from name
-  * the two are still separated when listing the files in the folder
-  * allows to distinguish one-off wirtings vs ongoing updating of a topic
-1. Include a small word counter to have an idea of how big the website is.
+    * the two are still separated when listing the files in the folder
+    * allows to distinguish one-off wirtings vs ongoing updating of a topic
+6. Include a small word counter to have an idea of how big the website is
