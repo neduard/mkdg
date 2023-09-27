@@ -51,7 +51,6 @@ where
     Q: AsRef<Path>,
 {
     // TODO: this can include compression/optimization of the png files
-    fs::create_dir_all(&to).unwrap();
     fs_extra::copy_items(&vec![from], to, &fs_extra::dir::CopyOptions::default()).unwrap();
 }
 
@@ -80,7 +79,7 @@ fn main() {
     )
     .unwrap();
 
-    process_images(website_path.join("images"), output_dir.join("images"));
+    process_images(website_path.join("images"), &output_dir);
 
     for page in pages {
         println!(
@@ -97,22 +96,25 @@ fn main() {
     println!("Starting demo server on http://{ADDRESS}");
     rouille::start_server(ADDRESS, move |request| {
         let request_path = format!("{}/{}", output_dir.to_str().unwrap(), request.url());
+        println!("GET {}", &request_path);
 
         // Check if the requested file exists
         if Path::new(&request_path).is_file() {
             let content_type = if request_path.ends_with("css") {
                 "text/css"
+            } else if request_path.ends_with("png") {
+                "img/png"
             } else {
                 "text/html"
             };
             let file = std::fs::File::open(request_path).unwrap();
             Response::from_file(content_type, file)
         } else {
+            // Serve the default index.html file if the requested file is not found
             let file = std::fs::File::open(format!("{}/index.html", output_dir.to_str().unwrap()))
                 .unwrap();
-            // Serve the default index.html file if the requested file is not found
-
             Response::from_file("text/html", file)
+                
         }
     });
 }
