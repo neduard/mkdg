@@ -51,8 +51,9 @@ fn render_website(
 fn process_images<P, Q>(from: P, to: Q)
 where P: AsRef<Path>, Q: AsRef<Path> {
      // TODO: this can include compression/optimization of the png files
+     fs::create_dir_all(&to).unwrap();
      fs_extra::copy_items(&vec![from], to, &fs_extra::dir::CopyOptions::default())
-        .expect("Unable to copy images");
+        .unwrap();
 }
 
 fn main() {
@@ -65,11 +66,14 @@ fn main() {
     env.set_source(Source::from_path(website_path.join("templates")));
     
     let output_dir = PathBuf::from_str(&args.output_dir).unwrap();
+    if output_dir.exists() {
+        panic!("{} already exists.  Please remove it first.", output_dir.display())
+    }
+
     render_website(&pages, &env, &output_dir);
     
-    fs::copy(website_path.join("sp-0.9.0.css"), &output_dir.join("default.css"))
-        .expect("Unable to copy css");    
-        
+    fs::copy(website_path.join("sp-0.9.0.css"), &output_dir.join("default.css")).unwrap();
+
     process_images(website_path.join("images"), output_dir.join("images"));
     
     for page in pages {
