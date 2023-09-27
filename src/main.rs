@@ -114,7 +114,6 @@ fn main() {
             let file = std::fs::File::open(format!("{}/index.html", output_dir.to_str().unwrap()))
                 .unwrap();
             Response::from_file("text/html", file)
-                
         }
     });
 }

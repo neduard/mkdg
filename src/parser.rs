@@ -158,7 +158,10 @@ pub fn load_pages(input_dir: &std::path::Path) -> Vec<Page> {
         for link in links {
             pages_map
                 .get_mut(&link)
-                .expect(&format!("{}: Unable to find link {}.  Maybe unexistent page?", &name, &link))
+                .expect(&format!(
+                    "{}: Unable to find link {}.  Maybe unexistent page?",
+                    &name, &link
+                ))
                 .backlinks
                 .push((name.clone(), title.clone()));
         }
