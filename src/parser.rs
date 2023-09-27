@@ -22,12 +22,9 @@ impl Page {
         let link_re = Regex::new(r#"<a href="([^#]+?)(#.*)?".*>"#).unwrap();
         let date_re = Regex::new(r"(\d{4})-(\d{2})-(\d{2})-.+").unwrap();
 
-
-        let title = title_re.captures(&body).expect(&format!(
-            "Unable to find title in {}",
-            &body
-        ))
-            [1]
+        let title = title_re
+            .captures(&body)
+            .expect(&format!("Unable to find title in {}", &body))[1]
             .to_owned();
 
         let links: Vec<String> = link_re
@@ -52,7 +49,8 @@ impl Page {
                     get_number(1, "year"),
                     get_number(2, "month").try_into().unwrap(),
                     get_number(3, "day").try_into().unwrap(),
-                ).unwrap(),
+                )
+                .unwrap(),
             )
         } else {
             None
@@ -66,34 +64,31 @@ impl Page {
             links,
             backlinks: Vec::new(),
         }
-
     }
 
     fn from_html(path: &std::path::Path) -> Page {
-        let name = path.file_name()
+        let name = path
+            .file_name()
             .unwrap()
             .to_str()
             .to_owned()
             .expect(&format!("Unable to extract file name for {:?}", path))
             .to_owned();
-        let body = std::fs::read_to_string(path).expect(&format!(
-            "Unable to read {}",
-            path.to_str().unwrap()
-        ));
+        let body = std::fs::read_to_string(path)
+            .expect(&format!("Unable to read {}", path.to_str().unwrap()));
         Page::from_string(name, body)
     }
 
     fn from_md(path: &std::path::Path) -> Page {
-        let name: String = path.file_name()
+        let name: String = path
+            .file_name()
             .unwrap()
             .to_os_string()
             .into_string()
             .expect(&format!("Unable to extract file name for {:?}", path))
             .replace(".md", ".html");
-        let body_md: String = std::fs::read_to_string(path).expect(&format!(
-            "Unable to read {}",
-            path.to_str().unwrap()
-        ));
+        let body_md: String = std::fs::read_to_string(path)
+            .expect(&format!("Unable to read {}", path.to_str().unwrap()));
         let body = markdown::to_html_with_options(
             &body_md,
             &markdown::Options {
@@ -103,10 +98,11 @@ impl Page {
                 },
                 ..markdown::Options::gfm()
             },
-        ).expect("Unable to parse markdown");
+        )
+        .expect("Unable to parse markdown");
         Page::from_string(name, body)
     }
-    
+
     pub fn word_count(self: &Self) -> usize {
         let html_tag = Regex::new(r"<.+?>").unwrap();
         html_tag
@@ -186,14 +182,16 @@ mod tests {
                 <h1>Another title just to be confusing</h1>
                 <p>Some more text with another <a href=\"https://www.google.com\">link</a></p>
                 <a href=\"2022-02-22-test_page_3.html\">Another link</a>",
-        ).expect("Unable to write page 1");
+        )
+        .expect("Unable to write page 1");
 
         std::fs::write(
             &dir.join("test_page_2.html"),
             b"<h1>Second Test Page</h1>
                 <p>Let's create a cycle <a href=\"test_page_1.html\">link</a></p>
                 <p>Let's create a cycle again <a href=\"test_page_1.html\">another link</a></p>",
-        ).expect("Unable to write page 2");
+        )
+        .expect("Unable to write page 2");
 
         std::fs::write(
             &dir.join("2022-02-22-test_page_3.html"),
@@ -201,21 +199,23 @@ mod tests {
                 <p>Let's create a self cycle <a href=\"2022-02-22-test_page_3.html\">link</a></p>
                 <p>Let's create a another self cycle
                 <a href=\"2022-02-22-test_page_3.html\">another link</a></p>",
-        ).expect("Unable to write page 3");
+        )
+        .expect("Unable to write page 3");
 
         std::fs::write(
             &dir.join("2022-02-23-test_page_4.html"),
             b"<h1>Title</h1><br>
                 <p>Can't have enough <a href=\"2022-02-22-test_page_3.html#header\">links</a></p>",
-        ).expect("Unable to write page 3");
-        
+        )
+        .expect("Unable to write page 3");
+
         std::fs::write(
             &dir.join("word_count.html"),
             b"<h1>Title</h1><br>
                 <p>Can't have <b>enough</b> words with <a href=\"2022-02-22-test_page_3.html\">
                 links</a></p>.  Also . s in gl e && do u bl e    l e tt er s don't count. !!!",
-        ).expect("Unable to write page 3");
-
+        )
+        .expect("Unable to write page 3");
     }
 
     #[test]
@@ -232,7 +232,7 @@ mod tests {
         assert_eq!(pages[3].name, "test_page_2.html");
         assert_eq!(pages[4].name, "word_count.html");
         assert_eq!(pages[4].word_count(), 11);
-        
+
         println!("Section links are ignored");
         assert_eq!(pages[0].links, vec!["2022-02-22-test_page_3.html"]);
         assert_eq!(pages[1].links, vec!["2022-02-22-test_page_3.html"]);
