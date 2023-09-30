@@ -17,7 +17,8 @@ This constraint achives a number of things:
    that may not be perfect, but are still good most of the time
 
 > Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away.
-> Antoine de Saint-Exupéry
+>
+> ~Antoine de Saint-Exupéry
 
 # Setup
 
