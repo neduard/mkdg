@@ -1,7 +1,8 @@
 # Features
 
 * Use Rust.
-* Use LLMs (to convert all your Python code into Rust)
+* Use LLMs (to convert all your Python code into Rust 🦀)
+* Use LLMs (for reviewing anything open source 🚀)
 * Use HTML (for flexibility)
 * Use [Markdown](2022-03-14-markdown.html) (for writeability)
 * Use [templates](https://docs.rs/minijinja/latest/minijinja/) (to minimise duplication)

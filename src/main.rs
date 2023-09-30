@@ -3,7 +3,6 @@ use parser::Page;
 use rouille::Response;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::str::FromStr;
 
 use minijinja::{context, AutoEscape, Environment, Source};
 
@@ -19,7 +18,7 @@ struct Args {
     output_dir: String,
 }
 
-fn render_website(pages: &Vec<Page>, env: &Environment, output_dir: &PathBuf) {
+fn render_website(pages: &[Page], env: &Environment, output_dir: &PathBuf) {
     fs::create_dir_all(&output_dir).unwrap();
 
     // Create pages.
@@ -63,7 +62,7 @@ fn main() {
     env.set_auto_escape_callback(|_| AutoEscape::None);
     env.set_source(Source::from_path(website_path.join("templates")));
 
-    let output_dir = PathBuf::from_str(&args.output_dir).unwrap();
+    let output_dir = PathBuf::from(&args.output_dir);
     if output_dir.exists() {
         panic!(
             "{} already exists.  Please remove it first.",
@@ -103,7 +102,7 @@ fn main() {
             let content_type = if request_path.ends_with("css") {
                 "text/css"
             } else if request_path.ends_with("png") {
-                "img/png"
+                "image/png"
             } else {
                 "text/html"
             };
