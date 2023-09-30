@@ -93,7 +93,10 @@ impl Page {
             &body_md,
             &markdown::Options {
                 compile: markdown::CompileOptions {
+                    // As a static website generator, we only parse files
+                    // written by the user.  There's no untrusted inputs.
                     allow_dangerous_html: true,
+                    allow_dangerous_protocol: true,
                     ..markdown::CompileOptions::gfm()
                 },
                 ..markdown::Options::gfm()
@@ -134,16 +137,19 @@ pub fn load_pages(input_dir: &std::path::Path) -> Vec<Page> {
         .collect::<std::collections::HashMap<_, _>>();
 
     // Create backlinks.
-    let backlinks: Vec<(Name, Title, Vec<Name>)> = pages_map
+    // First, select all the local links.
+    let page_links: Vec<(Name, Title, Vec<Name>)> = pages_map
         .iter()
         .map(|(name, page)| {
             (
+                // Create the result tuple.
                 name.clone(),
                 page.title.clone(),
+                // Go through the links and select the ones that are local.
+                // i.e. DON'T start with http and end in .html
                 page.links
                     .iter()
                     .filter_map(|link|
-                    // Only keep the links that don't start with http.
                     if !link.starts_with("http") && link.ends_with(".html") {
                         Some((*link).clone())
                     } else {
@@ -152,18 +158,19 @@ pub fn load_pages(input_dir: &std::path::Path) -> Vec<Page> {
                     .collect(),
             )
         })
-        .collect(); // What are for loops?
+        .collect();
 
-    for (name, title, links) in backlinks {
+    // Now we build the backlinks.
+    for (name, title, links) in page_links {
         for link in links {
             pages_map
-                .get_mut(&link)
+                .get_mut(&link)  // Get the page with the corresponding link.
                 .expect(&format!(
                     "{}: Unable to find link {}.  Maybe unexistent page?",
                     &name, &link
                 ))
                 .backlinks
-                .push((name.clone(), title.clone()));
+                .push((name.clone(), title.clone()));  // Add a backlink to that page.
         }
     }
 
