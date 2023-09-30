@@ -149,11 +149,12 @@ pub fn load_pages(input_dir: &std::path::Path) -> Vec<Page> {
                 // i.e. DON'T start with http and end in .html
                 page.links
                     .iter()
-                    .filter_map(|link|
-                    if !link.starts_with("http") && link.ends_with(".html") {
-                        Some((*link).clone())
-                    } else {
-                        None
+                    .filter_map(|link| {
+                        if !link.starts_with("http") && link.ends_with(".html") {
+                            Some((*link).clone())
+                        } else {
+                            None
+                        }
                     })
                     .collect(),
             )
@@ -164,13 +165,13 @@ pub fn load_pages(input_dir: &std::path::Path) -> Vec<Page> {
     for (name, title, links) in page_links {
         for link in links {
             pages_map
-                .get_mut(&link)  // Get the page with the corresponding link.
+                .get_mut(&link) // Get the page with the corresponding link.
                 .expect(&format!(
                     "{}: Unable to find link {}.  Maybe unexistent page?",
                     &name, &link
                 ))
                 .backlinks
-                .push((name.clone(), title.clone()));  // Add a backlink to that page.
+                .push((name.clone(), title.clone())); // Add a backlink to that page.
         }
     }
 
