@@ -111,7 +111,7 @@ impl Page {
         html_tag
             .replace_all(&self.body, " ")
             .split_whitespace()
-            .filter(|str| str.len() > 2)
+            .filter(|str| str.len() >= 2)
             .count()
     }
 }
