@@ -43,7 +43,7 @@ write your own.  I used it because I was familiar with it.
 # Features and simplifying assumptions
 
 A summary of the feature list can also be found in the
-[about](demo/about.md) [page](http://localhost:8000/about.html).
+[about](http://localhost:8000/about.html) page.
 
 Here is a more detailed breakdown:
 
