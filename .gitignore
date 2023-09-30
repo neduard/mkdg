@@ -1,3 +1,11 @@
+# Default output folder
+dist/
+
+#Python
 venv/
-test/dist/
+
+# Vim
 *.swp
+
+# Rust
+target/

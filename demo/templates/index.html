@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Welcome</h1>
+
+<p>Hello.  Welcome to the demo website.</p>
+
+<p>It has two purposes:</p>
+
+<ol>
+    <li>To test and showcase the <a href="about.html">available features</a></li>
+    <li>To be used as a starting point for others</li>
+</ol>
+{% endblock %}
+
+{% block footer %}
+
+Current word count: {{ word_count }} / <a href="https://web.archive.org/web/20230429234041/https://capitalizemytitle.com/page-count/35000-words/">35000</a> <br>
+Generated using a <a href="https://github.com/neduard/simple-digital-garden-generator/">few lines</a> of <a href="https://survey.stackoverflow.co/2022/#most-loved-dreaded-and-wanted-language-love-dread">rust</a><br/>
+
+{% endblock %}

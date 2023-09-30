@@ -1,9 +1,9 @@
-{% macro list_pages(pages) -%} 
+{% macro list_posts(posts) -%} 
     <ul>
-    {% for page in pages %}
-        <li><a href="{{page.name}}">{{page.title}}</a>
-            {% if page.date_formatted %}
-                - {{ page.date_formatted }}
+    {% for post in posts.values() %}
+        <li><a href="{{post.name}}">{{post.title}}</a>
+            {% if post.date %}
+                - {{post.date.strftime('%B %d, %Y')}}
             {% endif %}
         </li>
     {% endfor %}
@@ -15,8 +15,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>My website</title>
-        <link rel="stylesheet" href="/default.css" />
+        <title>My simple website</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/spcss@0.8.0" />
     </head>
     <body>
         <div id="header">
@@ -27,10 +27,6 @@
 
         <div id="content">
             {% block content %}{% endblock %}
-        </div>
-        
-        <div id="footer">
-            {% block footer %}{% endblock %}
         </div>
     </body>
 </html>

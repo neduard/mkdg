@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+{{ page.body }}
+
+{% if page.backlinks %}
+<section backlinks class="backlinks">
+<h2 id="backlinks-label">Backlinks</h2>
+<ul>
+{% for name, title in page.backlinks %}
+    <li> <a href="{{ name }}">{{ title }}</a> </li>
+{% endfor %}
+</ul>
+</section>
+{% endif %}
+
+{% endblock %}
+
+
+
+{% block footer %}
+
+{% if page.date_formatted %}
+
+<p>First written on: {{ page.date_formatted }} </p>
+
+{% endif %}
+
+{% endblock %}
+
