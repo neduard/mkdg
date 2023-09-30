@@ -1,6 +1,6 @@
 # Simple Digital Garden Generator
 
-Create a static-site digital garden in <500 LoC.
+Create a static-site digital garden in <500 LoC:
 
 ```
 wc -l src/*
@@ -8,6 +8,16 @@ wc -l src/*
   240 src/parser.rs
   360 total
 ```
+
+This constraint achives a number of things:
+
+1. It keeps things simple and easy to understand
+2. Hence, it encourages [customisation and adoption](https://akkartik.name/freewheeling/)
+3. It encourages more [creative solutions](https://en.wikipedia.org/wiki/Creative_limitation)
+   that may not be perfect, but are still good most of the time
+
+> Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away.
+> Antoine de Saint-Exupéry
 
 # Setup
 
@@ -18,7 +28,7 @@ wc -l src/*
 
 3. Open http://localhost:8000/
 
-4. Hack away
+4. Hack away and repeat from step 2
 
 5. Publish the created `dist/` folder to your hosting of choice
 
@@ -26,7 +36,8 @@ wc -l src/*
 # Notes
 
 The demo [base.html](demo/templates/base.html) is actually from the
-[Hakyll](https://jaspervdj.be/hakyll/) example site.
+[Hakyll](https://jaspervdj.be/hakyll/) example site.  Feel free to
+write your own.  I used it because I was familiar with it.
 
 # Features and simplifying assumptions
 
@@ -41,14 +52,13 @@ Here is a more detailed breakdown:
 2. All pages are in a fixed directory structure.
     * this removes the need to recurse into directories
     * it also means that each page can be identified by *just* it's name and not the full path
-3. Links are detected using `<a href="(.+)?">`
+3. Links are detected using a regex `<a href="(.+)?">`
     * Allows us to easily filter local links by checking if a link is prefixed with `http`
     * Regular pages + backlinks essentially mimic tags (but with the extra ability to add content)
     * Building the backlink table allows us to check for any dangling ones
-4. Title of a page is of the form `<h1>Title With Spaces</h1>`
-    * Might be a bit clunky, but we can easily search for it using a regex
-5. Distinguish between dated posts (YYYY-MM-DD- prefix) and regular pages
-purely from name
+4. Similar to links, the title is selected by a regex `<h1>(.+?)</h1>`
+5. Distinguish between dated posts  and regular pages
+purely by name: (i.e anything with a `YYYY-MM-DD-` prefix is considered a dated post)
     * the two are still separated when listing the files in the folder
     * allows to distinguish one-off wirtings vs ongoing updating of a topic
 6. Include a small word counter to have an idea of how big the website is
