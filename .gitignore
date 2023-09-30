@@ -1,7 +1,10 @@
-venv/
-test/dist/
+# Default output folder
 dist/
 
+#Python
+venv/
+
+# Vim
 *.swp
 
 # Rust
