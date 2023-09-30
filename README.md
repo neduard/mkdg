@@ -43,7 +43,7 @@ write your own.  I used it because I was familiar with it.
 # Features and simplifying assumptions
 
 A summary of the feature list can also be found in the
-[about](http://localhost:8000/about.html) page.
+[about](demo/about.md) [page](http://localhost:8000/about.html).
 
 Here is a more detailed breakdown:
 
@@ -58,8 +58,8 @@ Here is a more detailed breakdown:
     * Regular pages + backlinks essentially mimic tags (but with the extra ability to add content)
     * Building the backlink table allows us to check for any dangling ones
 4. Similar to links, the title is selected by a regex `<h1>(.+?)</h1>`
-5. Distinguish between dated posts  and regular pages
-purely by name: (i.e anything with a `YYYY-MM-DD-` prefix is considered a dated post)
+5. Distinguish between dated posts and regular pages purely by name:
+    * a dated post is any page with a `YYYY-MM-DD-` prefix (eg. `2023-09-30-my-post.md`)
     * the two are still separated when listing the files in the folder
     * allows to distinguish one-off wirtings vs ongoing updating of a topic
-6. Include a small word counter to have an idea of how big the website is
+6. Include a word counter to have an idea of how big is the website
