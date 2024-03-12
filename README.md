@@ -63,3 +63,8 @@ Here is a more detailed breakdown:
     * the two are still separated when listing the files in the folder
     * allows to distinguish one-off wirtings vs ongoing updating of a topic
 6. Include a word counter to have an idea of how big is the website
+
+# Missing features
+
+* [Headings lack IDs](https://github.com/wooorm/markdown-rs/issues/76), this
+makes it impossible to referece them.
