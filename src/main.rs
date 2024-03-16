@@ -63,12 +63,8 @@ fn main() {
     env.set_source(Source::from_path(website_path.join("templates")));
 
     let output_dir = PathBuf::from(&args.output_dir);
-    if output_dir.exists() {
-        panic!(
-            "{} already exists.  Please remove it first.",
-            output_dir.display()
-        )
-    }
+    fs::remove_dir_all(&output_dir)
+        .unwrap_or_else(|e| eprintln!("Warning: {e} {}", &output_dir.display()));
 
     render_website(&pages, &env, &output_dir);
 
