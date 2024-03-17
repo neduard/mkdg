@@ -16,6 +16,9 @@ struct Args {
 
     #[arg(short, long, default_value = "dist/")]
     output_dir: String,
+
+    #[arg(short, long, action)]
+    serve: bool,
 }
 
 fn render_website(pages: &[Page], env: &Environment, output_dir: &PathBuf) {
@@ -53,6 +56,33 @@ where
     fs_extra::copy_items(&vec![from], to, &fs_extra::dir::CopyOptions::default()).unwrap();
 }
 
+fn serve(serve_path: PathBuf) {
+    static ADDRESS: &str = "127.0.0.1:8000";
+    println!("Starting demo server on http://{ADDRESS}");
+    rouille::start_server(ADDRESS, move |request| {
+        let request_path = format!("{}/{}", serve_path.display(), request.url());
+        println!("GET {}", &request_path);
+
+        // Check if the requested file exists
+        if Path::new(&request_path).is_file() {
+            let content_type = if request_path.ends_with("css") {
+                "text/css"
+            } else if request_path.ends_with("png") {
+                "image/png"
+            } else {
+                "text/html"
+            };
+            let file = std::fs::File::open(request_path).unwrap();
+            Response::from_file(content_type, file)
+        } else {
+            // Serve the default index.html file if the requested file is not found
+            let file = std::fs::File::open(format!("{}/index.html", serve_path.display()))
+                .unwrap();
+            Response::from_file("text/html", file)
+        }
+    });
+}
+
 fn main() {
     let args = Args::parse();
     let website_path = Path::new(&args.website_path);
@@ -87,28 +117,7 @@ fn main() {
         );
     }
 
-    static ADDRESS: &str = "127.0.0.1:8000";
-    println!("Starting demo server on http://{ADDRESS}");
-    rouille::start_server(ADDRESS, move |request| {
-        let request_path = format!("{}/{}", output_dir.to_str().unwrap(), request.url());
-        println!("GET {}", &request_path);
-
-        // Check if the requested file exists
-        if Path::new(&request_path).is_file() {
-            let content_type = if request_path.ends_with("css") {
-                "text/css"
-            } else if request_path.ends_with("png") {
-                "image/png"
-            } else {
-                "text/html"
-            };
-            let file = std::fs::File::open(request_path).unwrap();
-            Response::from_file(content_type, file)
-        } else {
-            // Serve the default index.html file if the requested file is not found
-            let file = std::fs::File::open(format!("{}/index.html", output_dir.to_str().unwrap()))
-                .unwrap();
-            Response::from_file("text/html", file)
-        }
-    });
+    if args.serve {
+        serve(output_dir);
+    }
 }

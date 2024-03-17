@@ -24,8 +24,8 @@ This constraint achives a number of things:
 
 1. [Install Rust](https://www.rust-lang.org/tools/install)
 
-2. `cargo run -- --website-path demo` will compile the site to `dist/` and run
-   a small server to view it locally
+2. `cargo run -- --website-path demo --serve` will compile the site to `dist/`
+and run a small server to view it locally
 
 3. Open http://localhost:8000/
 
