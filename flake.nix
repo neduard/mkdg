@@ -20,9 +20,9 @@
           };
         };
 
-        defaultPackage = self.packages.${system}.mkdg;
+        packages.default = self.packages.${system}.mkdg;
 
-        devShell = pkgs.mkShell {
+        devShells.default = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
             rustc
             rustfmt
