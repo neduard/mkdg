@@ -1,5 +1,5 @@
 {
-  description = "make digital garden";
+  description = "make a static site digital garden";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -17,7 +17,7 @@
 
           meta = with pkgs.lib; {
             homepage = "https://github.com/neduard/mkdg";
-            license = liceses.mit;
+            license = licenses.mit;
           };
 
           cargoLock = {
