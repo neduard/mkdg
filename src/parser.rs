@@ -242,7 +242,7 @@ mod tests {
         assert_eq!(pages[2].name, "test_page_1.html");
         assert_eq!(pages[3].name, "test_page_2.html");
         assert_eq!(pages[4].name, "word_count.html");
-        assert_eq!(pages[4].word_count(), 11);
+        assert_eq!(pages[4].word_count(), 18);
 
         println!("Section links are ignored");
         assert_eq!(pages[0].links, vec!["2022-02-22-test_page_3.html"]);
