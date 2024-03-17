@@ -15,6 +15,11 @@
           version = "0.1.0";
           src = ./.;
 
+          meta = with pkgs.lib; {
+            homepage = "https://github.com/neduard/mkdg";
+            license = liceses.mit;
+          };
+
           cargoLock = {
             lockFile = ./Cargo.lock;
           };
@@ -24,9 +29,10 @@
 
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
+            cargo
+            clippy
             rustc
             rustfmt
-            cargo
           ];
         };
       }
